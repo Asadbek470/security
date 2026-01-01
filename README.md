@@ -5,116 +5,170 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hyper OS: Secure Persistent Edition</title>
+    <title>Hyper OS: Ultimate Secure Edition</title>
     <style>
-        /* --- CORE STYLES --- */
+        /* --- THEME VARIABLES --- */
         :root {
-            --bg-dark: #050505;
-            --glass: rgba(20, 25, 35, 0.7);
-            --glass-border: 1px solid rgba(255, 255, 255, 0.1);
-            --blur: blur(20px);
-            --accent: #00f3ff;
+            --bg-color: #050505;
+            --window-bg: #1e1e1e;
+            --text-color: #ffffff;
+            --accent: #00f3ff; /* Default Blue */
+            --accent-sec: #0066ff;
             --danger: #ff2a2a;
-            --font: 'Segoe UI', system-ui, sans-serif;
-            --mono: 'Consolas', monospace;
+            --font-main: 'Segoe UI', Roboto, Helvetica, sans-serif;
+            --font-mono: 'Consolas', 'Courier New', monospace;
+            --glass: rgba(20, 25, 35, 0.85);
+            --blur: blur(15px);
+            --border: 1px solid rgba(255, 255, 255, 0.1);
+            --taskbar-h: 45px;
+        }
+
+        /* THEMES */
+        [data-theme="cyberpunk"] {
+            --bg-color: #0b0014;
+            --window-bg: #1a0518;
+            --accent: #ff0055; /* Neon Pink */
+            --accent-sec: #fcee0a; /* Yellow */
+            --font-main: 'Segoe UI', sans-serif;
+            --border: 1px solid #ff0055;
+            --glass: rgba(40, 0, 40, 0.9);
+        }
+
+        [data-theme="hacker"] {
+            --bg-color: #000000;
+            --window-bg: #0d0d0d;
+            --accent: #00ff00; /* Matrix Green */
+            --accent-sec: #008f11;
+            --text-color: #00ff00;
+            --font-main: 'Courier New', monospace;
+            --border: 1px solid #00ff00;
+            --glass: rgba(0, 20, 0, 0.95);
         }
 
         * { box-sizing: border-box; user-select: none; }
-        body { margin: 0; overflow: hidden; background: #000; font-family: var(--font); color: white; height: 100vh; }
+        body { margin: 0; overflow: hidden; background: #000; font-family: var(--font-main); color: var(--text-color); height: 100vh; }
 
-        /* --- WALLPAPER --- */
+        /* --- WALLPAPER & LAYOUT --- */
         #wallpaper {
             position: absolute; inset: 0; z-index: 0;
             background-size: cover; background-position: center;
             transition: 0.5s;
+            filter: brightness(0.6);
         }
 
         /* --- LOCK SCREEN --- */
         #lock-screen {
             position: fixed; inset: 0; z-index: 10000;
-            background: rgba(0,0,0,0.9);
+            background: black;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             transition: opacity 0.5s;
         }
-        .login-box { text-align: center; width: 300px; }
-        .avatar { width: 100px; height: 100px; border-radius: 50%; background: #333; margin: 0 auto 20px; border: 2px solid var(--accent); background-image: url('https://cdn-icons-png.flaticon.com/512/3135/3135715.png'); background-size: cover; }
+        .login-box { text-align: center; width: 350px; padding: 40px; border: var(--border); background: rgba(0,0,0,0.8); box-shadow: 0 0 30px var(--accent); }
+        .avatar { width: 100px; height: 100px; border-radius: 50%; margin: 0 auto 20px; border: 3px solid var(--accent); background-image: url('https://cdn-icons-png.flaticon.com/512/3135/3135715.png'); background-size: cover; }
         .pass-input {
-            width: 100%; padding: 10px; background: rgba(255,255,255,0.1); border: 1px solid #333;
-            color: white; text-align: center; font-size: 18px; border-radius: 5px; outline: none;
-            margin-top: 10px;
+            width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid #444;
+            color: var(--text-color); text-align: center; font-size: 18px; border-radius: 4px; outline: none; margin-top: 15px; font-family: var(--font-mono);
         }
-        .pass-input:focus { border-color: var(--accent); }
+        .pass-input:focus { border-color: var(--accent); box-shadow: 0 0 10px var(--accent); }
+        
+        .error-shake { animation: shake 0.3s; border-color: var(--danger) !important; }
+        @keyframes shake { 0% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } 100% { transform: translateX(0); } }
 
         /* --- DESKTOP --- */
-        #desktop { position: absolute; inset: 0; z-index: 10; padding: 20px; display: flex; flex-direction: column; flex-wrap: wrap; align-content: flex-start; gap: 10px; height: 90vh; }
+        #desktop { position: absolute; inset: 0; z-index: 10; padding: 20px; display: flex; flex-direction: column; flex-wrap: wrap; align-content: flex-start; gap: 15px; height: calc(100vh - var(--taskbar-h)); }
 
         .icon {
             width: 90px; height: 100px; display: flex; flex-direction: column; align-items: center;
             cursor: pointer; border-radius: 5px; text-align: center; transition: 0.2s;
+            padding: 5px;
         }
-        .icon:hover { background: rgba(255,255,255,0.1); }
-        .icon img { width: 50px; height: 50px; margin-bottom: 5px; filter: drop-shadow(0 2px 5px black); }
-        .icon span { font-size: 12px; text-shadow: 0 1px 2px black; word-break: break-word; }
+        .icon:hover { background: rgba(255,255,255,0.1); transform: translateY(-2px); }
+        .icon img { width: 50px; height: 50px; margin-bottom: 8px; filter: drop-shadow(0 4px 5px rgba(0,0,0,0.8)); }
+        .icon span { font-size: 13px; text-shadow: 0 2px 4px black; line-height: 1.2; font-weight: 500; }
 
         /* --- WINDOWS --- */
         .window {
-            position: absolute; width: 500px; height: 400px;
-            background: #1e1e1e; border: 1px solid #444; border-radius: 8px;
-            box-shadow: 0 20px 50px rgba(0,0,0,0.8);
+            position: absolute; width: 600px; height: 450px;
+            background: var(--window-bg); border: var(--border); border-radius: 6px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.9);
             display: flex; flex-direction: column; overflow: hidden;
-            top: 50px; left: 50px; opacity: 0; transform: scale(0.95);
+            top: 10%; left: 15%; opacity: 0; transform: scale(0.9);
             transition: opacity 0.2s, transform 0.2s;
+            resize: both;
         }
         .window.open { opacity: 1; transform: scale(1); }
 
         .titlebar {
-            height: 35px; background: #2d2d2d; display: flex; align-items: center; justify-content: space-between; padding: 0 10px; cursor: grab;
+            height: 35px; background: rgba(255,255,255,0.05); display: flex; align-items: center; justify-content: space-between; padding: 0 10px; cursor: grab; border-bottom: 1px solid rgba(255,255,255,0.1);
         }
-        .win-controls button { width: 12px; height: 12px; border-radius: 50%; border: none; margin-left: 5px; cursor: pointer; }
+        .titlebar span { font-size: 14px; font-weight: bold; letter-spacing: 1px; color: var(--accent); }
+        .win-controls button { width: 14px; height: 14px; border-radius: 50%; border: none; margin-left: 6px; cursor: pointer; }
         .btn-close { background: #ff5555; } .btn-min { background: #ffbd44; } .btn-max { background: #00ca4e; }
 
-        .win-content { flex: 1; background: #252526; color: #ccc; overflow: hidden; position: relative; }
+        .win-content { flex: 1; background: rgba(0,0,0,0.2); overflow: hidden; position: relative; display: flex; flex-direction: column; }
         
-        /* App Specifics */
-        .editor-area { width: 100%; height: 100%; padding: 20px; outline: none; background: white; color: black; font-family: 'Times New Roman'; overflow-y: auto; }
-        .terminal-area { background: #0c0c0c; color: #00f3ff; font-family: var(--mono); padding: 10px; height: 100%; overflow-y: auto; }
-        .settings-area { padding: 20px; overflow-y: auto; height: 100%; }
-        .setting-group { margin-bottom: 20px; border-bottom: 1px solid #333; padding-bottom: 10px; }
-        .setting-label { display: block; margin-bottom: 5px; color: white; }
-        .setting-input { width: 100%; padding: 8px; background: #111; border: 1px solid #444; color: white; border-radius: 4px; }
-        .btn-action { padding: 8px 15px; background: var(--accent); color: black; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; margin-top: 5px; }
+        /* App Layouts */
+        .browser-bar { display: flex; gap: 5px; padding: 8px; background: #222; border-bottom: 1px solid #333; }
+        .url-input { flex: 1; padding: 5px 10px; border-radius: 20px; border: none; background: #111; color: white; outline: none; }
+        .browser-frame { flex: 1; background: white; border: none; }
+        .browser-placeholder { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #aaa; text-align: center; padding: 20px; }
+        
+        .editor-area { width: 100%; height: 100%; padding: 20px; outline: none; background: #fff; color: #000; overflow-y: auto; font-family: 'Times New Roman'; }
+        [data-theme="hacker"] .editor-area { background: #000; color: #0f0; font-family: monospace; }
+        
+        .image-viewer { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: #111; }
+        .image-viewer img { max-width: 100%; max-height: 100%; object-fit: contain; }
+
+        .settings-area { padding: 25px; overflow-y: auto; height: 100%; }
+        .setting-group { margin-bottom: 25px; border-bottom: 1px solid #333; padding-bottom: 15px; }
+        .setting-label { display: block; margin-bottom: 8px; color: var(--accent); font-weight: bold; }
+        .setting-input { width: 100%; padding: 10px; background: #111; border: 1px solid #444; color: white; border-radius: 4px; outline: none; }
+        .btn-action { padding: 8px 20px; background: var(--accent); color: black; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; margin-top: 10px; transition: 0.2s; }
+        .btn-action:hover { filter: brightness(1.2); }
 
         /* --- TASKBAR --- */
         #taskbar {
-            position: absolute; bottom: 0; width: 100%; height: 45px;
-            background: rgba(15, 15, 20, 0.9); backdrop-filter: var(--blur);
-            border-top: 1px solid #333; display: flex; align-items: center; justify-content: space-between; padding: 0 15px; z-index: 5000;
+            position: absolute; bottom: 0; width: 100%; height: var(--taskbar-h);
+            background: var(--glass); backdrop-filter: var(--blur);
+            border-top: var(--border); display: flex; align-items: center; justify-content: space-between; padding: 0 15px; z-index: 5000;
         }
-        .start-btn { background: var(--accent); color: black; padding: 5px 15px; font-weight: bold; border-radius: 3px; cursor: pointer; }
-        .tray { display: flex; gap: 15px; font-size: 12px; color: #aaa; align-items: center; }
+        .start-btn { 
+            background: linear-gradient(45deg, var(--accent), var(--accent-sec)); 
+            color: black; padding: 6px 18px; font-weight: bold; border-radius: 4px; cursor: pointer; 
+            box-shadow: 0 0 10px var(--accent); text-transform: uppercase; letter-spacing: 1px;
+        }
+        .tray { display: flex; gap: 15px; font-size: 13px; color: #ccc; align-items: center; font-family: var(--font-mono); }
 
         /* --- CONTEXT MENU --- */
         #context-menu {
-            position: absolute; width: 180px; background: #2d2d2d; border: 1px solid #444;
-            display: none; z-index: 9999; box-shadow: 0 5px 15px black;
+            position: absolute; width: 220px; background: #222; border: 1px solid #444;
+            display: none; z-index: 9999; box-shadow: 5px 5px 15px black;
         }
-        .ctx-item { padding: 10px; cursor: pointer; font-size: 13px; color: white; }
+        .ctx-item { padding: 12px; cursor: pointer; font-size: 13px; color: white; border-bottom: 1px solid #333; }
         .ctx-item:hover { background: var(--accent); color: black; }
+        .ctx-item:last-child { border-bottom: none; }
 
         /* Notifications */
-        #notif-area { position: absolute; bottom: 60px; right: 20px; z-index: 9999; }
-        .toast { background: #333; border-left: 3px solid var(--accent); color: white; padding: 10px 20px; margin-top: 10px; box-shadow: 0 5px 15px black; animation: slideIn 0.3s; }
-        @keyframes slideIn { from { transform: translateX(100%); } to { transform: translateX(0); } }
+        #notif-area { position: absolute; bottom: 60px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 10px; }
+        .toast { 
+            background: rgba(0,0,0,0.9); border-right: 4px solid var(--accent); color: white; 
+            padding: 15px 25px; min-width: 250px; box-shadow: -5px 5px 15px black; 
+            animation: slideIn 0.3s forwards; opacity: 0; transform: translateX(100%);
+        }
+        @keyframes slideIn { to { opacity: 1; transform: translateX(0); } }
+
+        iframe { border: none; width: 100%; height: 100%; }
     </style>
 </head>
-<body>
+<body data-theme="default">
 
     <!-- LOCK SCREEN -->
     <div id="lock-screen">
         <div class="login-box">
             <div class="avatar"></div>
-            <h2 id="lock-msg">SECURE LOGIN</h2>
-            <input type="password" id="password-input" class="pass-input" placeholder="Enter Password">
+            <h2 id="lock-msg" style="color:var(--accent); text-transform:uppercase;">Система Безопасности</h2>
+            <input type="password" id="password-input" class="pass-input" placeholder="Введите пароль">
+            <p style="font-size:12px; color:#666; margin-top:10px;">Подсказка по умолчанию: 1234</p>
         </div>
     </div>
 
@@ -129,19 +183,20 @@
 
     <!-- TASKBAR -->
     <div id="taskbar">
-        <div class="start-btn" onclick="toggleStart()">HYPER OS</div>
+        <div class="start-btn" onclick="Apps.toggleMenu()">ПУСК</div>
         <div class="tray">
-            <span id="region-display">US/East</span>
+            <span id="security-status" style="color:var(--accent);">● ЗАЩИЩЕНО</span>
             <span id="clock">12:00</span>
         </div>
     </div>
 
     <!-- CONTEXT MENU -->
     <div id="context-menu">
-        <div class="ctx-item" onclick="Apps.createFile('doc')">📄 New Document</div>
-        <div class="ctx-item" onclick="Apps.createFile('secret')">🔒 New Secret File</div>
-        <div class="ctx-item" onclick="System.openApp('terminal', null)">💻 Open Terminal</div>
-        <div class="ctx-item" onclick="System.openApp('settings', null)">⚙️ Settings</div>
+        <div class="ctx-item" onclick="Apps.createFile('doc')">📄 Новый Документ</div>
+        <div class="ctx-item" onclick="Apps.createFile('secret')">🔒 Секретный файл (Текст)</div>
+        <div class="ctx-item" onclick="Apps.createFile('secret-img')">🖼️ Секретная Картинка (Маскировка)</div>
+        <div class="ctx-item" onclick="System.openApp('browser', null)">🌐 Браузер Google</div>
+        <div class="ctx-item" onclick="System.openApp('settings', null)">⚙️ Настройки</div>
     </div>
 
     <!-- NOTIFICATIONS -->
@@ -150,26 +205,22 @@
     <script>
         /* --- CORE SYSTEM & STORAGE --- */
         const System = {
-            // Default Config
             defaultConfig: {
                 password: "1234",
-                wallpaper: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=2072",
-                region: "US/Washington",
-                showSecrets: false
+                wallpaper: "https://images.unsplash.com/photo-1550751827-4bd374c3f58b?q=80&w=2070", // Cyberpunk city
+                theme: "default"
             },
-            // Default Files
             defaultFiles: [
-                { id: 'f1', name: 'Welcome.txt', type: 'doc', content: '<h1>Welcome to Hyper OS</h1><p>This system uses localStorage.</p><p>You can create files, save them, and refresh the page. They will persist!</p>', date: Date.now() },
-                { id: 'f2', name: 'Codes.txt', type: 'doc', content: 'Top Secret Launch Codes: 000-000', isSecret: true, date: Date.now() }
+                { id: 'f1', name: 'О Системе.txt', type: 'doc', content: '<h1>Hyper OS v5.0</h1><p>Система обновлена. Добавлена поддержка Google, YouTube и маскировка файлов.</p>', date: Date.now() },
             ],
 
             state: {},
             files: [],
+            clipboard: null,
 
             init: function() {
-                // Load from LocalStorage
-                const savedConfig = localStorage.getItem('hyper_config');
-                const savedFiles = localStorage.getItem('hyper_files');
+                const savedConfig = localStorage.getItem('hyper_config_v2');
+                const savedFiles = localStorage.getItem('hyper_files_v2');
 
                 this.state = savedConfig ? JSON.parse(savedConfig) : this.defaultConfig;
                 this.files = savedFiles ? JSON.parse(savedFiles) : this.defaultFiles;
@@ -179,20 +230,22 @@
                 this.updateClock();
                 setInterval(() => this.updateClock(), 1000);
 
-                // Lock Screen Event
-                document.getElementById('password-input').addEventListener('keyup', (e) => {
+                // Lock Screen Input
+                const passInput = document.getElementById('password-input');
+                passInput.focus();
+                passInput.addEventListener('keyup', (e) => {
                     if(e.key === 'Enter') this.login();
                 });
             },
 
             saveState: function() {
-                localStorage.setItem('hyper_config', JSON.stringify(this.state));
-                localStorage.setItem('hyper_files', JSON.stringify(this.files));
+                localStorage.setItem('hyper_config_v2', JSON.stringify(this.state));
+                localStorage.setItem('hyper_files_v2', JSON.stringify(this.files));
             },
 
             applyConfig: function() {
                 document.getElementById('wallpaper').style.backgroundImage = `url('${this.state.wallpaper}')`;
-                document.getElementById('region-display').innerText = this.state.region;
+                document.body.setAttribute('data-theme', this.state.theme);
             },
 
             login: function() {
@@ -201,10 +254,13 @@
                     const lock = document.getElementById('lock-screen');
                     lock.style.opacity = '0';
                     setTimeout(() => lock.style.display = 'none', 500);
-                    this.notify("System Unlocked", "Welcome back, Agent.");
+                    this.notify("Доступ разрешен", "Добро пожаловать в систему.");
+                    // Play startup sound simulated
                 } else {
-                    input.style.border = "1px solid red";
+                    input.classList.add('error-shake');
                     input.value = "";
+                    input.placeholder = "НЕВЕРНЫЙ ПАРОЛЬ";
+                    setTimeout(() => input.classList.remove('error-shake'), 500);
                 }
             },
 
@@ -214,129 +270,170 @@
                 toast.className = 'toast';
                 toast.innerHTML = `<b>${title}</b><br>${msg}`;
                 area.appendChild(toast);
-                setTimeout(() => toast.remove(), 3000);
+                setTimeout(() => toast.remove(), 4000);
             },
 
             renderDesktop: function() {
                 const desk = document.getElementById('desktop');
                 desk.innerHTML = '';
                 
-                // Static Apps
-                this.createIcon(desk, 'My Computer', 'pc', () => alert('System Info: v4.0 Persistent'));
-                this.createIcon(desk, 'Recycle Bin', 'trash', () => alert('Bin is empty'));
-                this.createIcon(desk, 'Settings', 'settings', () => this.openApp('settings', null));
-                this.createIcon(desk, 'Terminal', 'terminal', () => this.openApp('terminal', null));
+                // System Apps
+                this.createIcon(desk, 'Мой ПК', 'pc', () => alert('Процессор: Quantum Core i9\nПамять: 128 TB\nЗащита: Активна'));
+                this.createIcon(desk, 'Google', 'chrome', () => this.openApp('browser', null));
+                this.createIcon(desk, 'YouTube', 'youtube', () => this.openApp('youtube', null));
+                this.createIcon(desk, 'WhatsApp', 'whatsapp', () => this.openLink('https://web.whatsapp.com'));
+                this.createIcon(desk, 'Telegram', 'telegram', () => this.openLink('https://web.telegram.org'));
+                this.createIcon(desk, 'Настройки', 'settings', () => this.openApp('settings', null));
+                this.createIcon(desk, 'Корзина', 'trash', () => alert('Корзина пуста'));
 
-                // Dynamic Files
+                // User Files
                 this.files.forEach(file => {
-                    if(file.isSecret && !this.state.showSecrets) return; // Hide secret files logic
+                    let iconType = 'file';
+                    // Маскировка: Секретные картинки выглядят как документы
+                    if(file.type === 'doc') iconType = 'doc';
+                    else if(file.type === 'secret') iconType = 'lock';
+                    else if(file.type === 'secret-img') iconType = 'doc'; // Disguise!
 
-                    let iconType = file.type === 'doc' ? 'doc' : 'file';
-                    if(file.isSecret) iconType = 'secret';
-
-                    this.createIcon(desk, file.name, iconType, () => this.openApp('editor', file.id));
+                    this.createIcon(desk, file.name, iconType, () => this.handleFileOpen(file));
                 });
             },
 
             createIcon: function(container, name, type, action) {
-                let img = '';
-                if(type === 'pc') img = 'https://cdn-icons-png.flaticon.com/512/3067/3067469.png';
-                else if(type === 'trash') img = 'https://cdn-icons-png.flaticon.com/512/3221/3221897.png';
-                else if(type === 'settings') img = 'https://cdn-icons-png.flaticon.com/512/3953/3953226.png';
-                else if(type === 'terminal') img = 'https://cdn-icons-png.flaticon.com/512/2620/2620958.png';
-                else if(type === 'doc') img = 'https://cdn-icons-png.flaticon.com/512/5968/5968517.png';
-                else if(type === 'secret') img = 'https://cdn-icons-png.flaticon.com/512/2965/2965302.png';
+                const icons = {
+                    pc: 'https://cdn-icons-png.flaticon.com/512/3067/3067469.png',
+                    chrome: 'https://cdn-icons-png.flaticon.com/512/2991/2991148.png',
+                    youtube: 'https://cdn-icons-png.flaticon.com/512/1384/1384060.png',
+                    whatsapp: 'https://cdn-icons-png.flaticon.com/512/733/733585.png',
+                    telegram: 'https://cdn-icons-png.flaticon.com/512/2111/2111646.png',
+                    settings: 'https://cdn-icons-png.flaticon.com/512/3953/3953226.png',
+                    trash: 'https://cdn-icons-png.flaticon.com/512/3221/3221897.png',
+                    doc: 'https://cdn-icons-png.flaticon.com/512/5968/5968517.png',
+                    lock: 'https://cdn-icons-png.flaticon.com/512/2965/2965302.png',
+                    file: 'https://cdn-icons-png.flaticon.com/512/2965/2965302.png'
+                };
 
                 const div = document.createElement('div');
                 div.className = 'icon';
-                div.innerHTML = `<img src="${img}"><span>${name}</span>`;
+                div.innerHTML = `<img src="${icons[type] || icons.file}"><span>${name}</span>`;
                 div.onclick = action;
                 div.oncontextmenu = (e) => {
                     e.preventDefault();
-                    if(type === 'doc' || type === 'secret') {
-                        if(confirm(`Delete ${name}?`)) {
-                            this.files = this.files.filter(f => f.name !== name);
-                            this.saveState();
-                            this.renderDesktop();
-                        }
+                    if(confirm(`Удалить ${name}?`)) {
+                        this.files = this.files.filter(f => f.name !== name);
+                        this.saveState();
+                        this.renderDesktop();
                     }
                 };
                 container.appendChild(div);
             },
 
-            updateClock: function() {
-                const now = new Date();
-                document.getElementById('clock').innerText = now.toLocaleTimeString();
+            openLink: function(url) {
+                window.open(url, '_blank');
             },
 
-            /* --- APP WINDOW LOGIC --- */
+            handleFileOpen: function(file) {
+                if(file.type.startsWith('secret')) {
+                    const pass = prompt("🔐 Введите пароль для доступа к файлу:");
+                    if(pass === this.state.password) {
+                        if(file.type === 'secret-img') {
+                            this.openApp('image-view', file);
+                        } else {
+                            this.openApp('editor', file);
+                        }
+                    } else {
+                        this.notify("ОШИБКА", "Неверный пароль! Попытка взлома зафиксирована.");
+                    }
+                } else {
+                    this.openApp('editor', file);
+                }
+            },
+
+            updateClock: function() {
+                const now = new Date();
+                document.getElementById('clock').innerText = now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            },
+
+            /* --- APP WINDOW SYSTEM --- */
             zIndex: 100,
-            openApp: function(appType, fileId) {
+            openApp: function(appType, data) {
                 const win = document.createElement('div');
                 win.className = 'window';
                 win.style.zIndex = ++this.zIndex;
                 
-                // Content Switch
-                let title = '';
+                let title = 'Приложение';
                 let contentHTML = '';
 
                 if(appType === 'settings') {
-                    title = 'System Settings';
+                    title = 'Настройки Системы';
                     contentHTML = `
                         <div class="settings-area">
-                            <h2>Control Panel</h2>
                             <div class="setting-group">
-                                <label class="setting-label">Wallpaper URL</label>
-                                <input id="set-bg" class="setting-input" value="${this.state.wallpaper}">
-                                <button class="btn-action" onclick="Apps.saveSettings('bg')">Apply</button>
-                            </div>
-                            <div class="setting-group">
-                                <label class="setting-label">System Password</label>
-                                <input id="set-pass" class="setting-input" value="${this.state.password}">
-                                <button class="btn-action" onclick="Apps.saveSettings('pass')">Update</button>
-                            </div>
-                            <div class="setting-group">
-                                <label class="setting-label">Region (Text Display)</label>
-                                <select id="set-reg" class="setting-input">
-                                    <option value="US/Washington">US/Washington</option>
-                                    <option value="EU/London">EU/London</option>
-                                    <option value="RU/Moscow">RU/Moscow</option>
+                                <label class="setting-label">Тема Интерфейса</label>
+                                <select id="set-theme" class="setting-input" onchange="Apps.saveSettings('theme')">
+                                    <option value="default" ${this.state.theme === 'default' ? 'selected' : ''}>Hyper Default (Blue)</option>
+                                    <option value="cyberpunk" ${this.state.theme === 'cyberpunk' ? 'selected' : ''}>Cyberpunk 2077</option>
+                                    <option value="hacker" ${this.state.theme === 'hacker' ? 'selected' : ''}>Matrix Hacker</option>
                                 </select>
-                                <button class="btn-action" onclick="Apps.saveSettings('reg')">Set Region</button>
                             </div>
-                            <div class="setting-group" style="border:none;">
-                                <label class="setting-label" style="color:red;">Red Protocol (Show Secrets)</label>
-                                <button class="btn-action" style="background:${this.state.showSecrets ? 'red':'#333'}; color:white;" onclick="Apps.toggleSecrets()">
-                                    ${this.state.showSecrets ? 'DEACTIVATE' : 'ACTIVATE'}
-                                </button>
+                            <div class="setting-group">
+                                <label class="setting-label">URL Обоев</label>
+                                <input id="set-bg" class="setting-input" value="${this.state.wallpaper}">
+                                <button class="btn-action" onclick="Apps.saveSettings('bg')">Применить</button>
+                            </div>
+                            <div class="setting-group">
+                                <label class="setting-label">Пароль Системы</label>
+                                <input id="set-pass" class="setting-input" type="password" value="${this.state.password}">
+                                <button class="btn-action" onclick="Apps.saveSettings('pass')">Обновить защиту</button>
                             </div>
                         </div>
                     `;
                 } else if (appType === 'editor') {
-                    const file = this.files.find(f => f.id === fileId);
-                    title = file.name;
+                    title = data.name + (data.type === 'secret' ? ' [РАССЕКРЕЧЕНО]' : '');
                     contentHTML = `
                         <div style="display:flex; flex-direction:column; height:100%;">
-                            <div style="background:#f0f0f0; padding:5px;">
-                                <button onclick="Apps.saveDoc('${fileId}', this)">💾 SAVE</button>
+                            <div style="background:#222; padding:5px; display:flex; gap:5px;">
+                                <button onclick="Apps.saveDoc('${data.id}', this)" class="btn-action" style="margin:0; padding:4px 10px;">💾 Сохранить</button>
+                                ${data.type !== 'secret' ? `<button onclick="Apps.insertImage('${data.id}')" class="btn-action" style="margin:0; padding:4px 10px;">🖼 Вставить фото</button>` : ''}
                             </div>
-                            <div class="editor-area" id="editor-${fileId}" contenteditable="true">${file.content}</div>
+                            <div class="editor-area" id="editor-${data.id}" contenteditable="true">${data.content}</div>
                         </div>
                     `;
-                } else if (appType === 'terminal') {
-                    title = 'Bash Terminal';
+                } else if (appType === 'image-view') {
+                    title = 'Просмотр: ' + data.name;
                     contentHTML = `
-                        <div class="terminal-area" id="term-out" onclick="document.getElementById('term-in').focus()">
-                            <div>Hyper Linux 4.0 [Persistent Core]</div>
-                            <div>Type 'help' for commands.</div><br>
-                            <div id="term-history"></div>
-                            <div style="display:flex;">
-                                <span>root@hyper:~#&nbsp;</span>
-                                <input id="term-in" style="background:none; border:none; color:white; font-family:inherit; flex:1; outline:none;" autocomplete="off">
+                        <div class="image-viewer">
+                            <img src="${data.content}" alt="Secret Image" onerror="this.src='https://via.placeholder.com/400?text=Error+Loading+Image'">
+                        </div>
+                    `;
+                } else if (appType === 'browser') {
+                    title = 'Google Chrome (Secure Proxy)';
+                    contentHTML = `
+                        <div style="display:flex; flex-direction:column; height:100%;">
+                            <div class="browser-bar">
+                                <span style="font-size:20px; cursor:pointer;" onclick="Apps.navBrowser('back')">⬅</span>
+                                <input id="browser-url" class="url-input" placeholder="Введите запрос или URL картинки" value="google.com">
+                                <button class="btn-action" style="margin:0;" onclick="Apps.navBrowser('go')">GO</button>
+                            </div>
+                            <div class="browser-placeholder" id="browser-content">
+                                <img src="https://www.google.com/images/branding/googlelogo/1x/googlelogo_light_color_272x92dp.png" width="200" style="opacity:0.8"><br><br>
+                                <h2>Безопасный Поиск</h2>
+                                <p>Введите запрос сверху. Поиск Google откроется в защищенной вкладке.</p>
+                                <p><i>Чтобы скачать картинку: Найдите её в Google -> ПКМ -> "Копировать URL картинки" -> Вставьте в секретный файл.</i></p>
                             </div>
                         </div>
                     `;
-                    setTimeout(Apps.initTerminal, 100);
+                } else if (appType === 'youtube') {
+                    title = 'YouTube';
+                    win.style.width = '700px';
+                    contentHTML = `
+                        <div style="display:flex; flex-direction:column; height:100%;">
+                            <div class="browser-bar">
+                                <input id="yt-search" class="url-input" placeholder="Поиск видео...">
+                                <button class="btn-action" style="margin:0;" onclick="Apps.searchYT()">Искать</button>
+                            </div>
+                             <iframe id="yt-frame" src="https://www.youtube.com/embed/dQw4w9WgXcQ" allowfullscreen></iframe>
+                        </div>
+                    `;
                 }
 
                 win.innerHTML = `
@@ -344,6 +441,7 @@
                         <span>${title}</span>
                         <div class="win-controls">
                             <button class="btn-min" onclick="this.closest('.window').style.display='none'"></button>
+                            <button class="btn-max" onclick="this.closest('.window').classList.toggle('maximized')"></button>
                             <button class="btn-close" onclick="this.closest('.window').remove()"></button>
                         </div>
                     </div>
@@ -373,18 +471,30 @@
             }
         };
 
-        /* --- APPLICATIONS LOGIC --- */
+        /* --- APP LOGIC --- */
         const Apps = {
             createFile: function(type) {
-                const name = prompt("Enter file name:", type === 'doc' ? "New Doc.txt" : "Secret.txt");
+                let name = "";
+                let content = "";
+                let fileType = type;
+
+                if (type === 'secret-img') {
+                    name = prompt("Имя скрытого файла (будет выглядеть как документ):", "Project_X.txt");
+                    const url = prompt("Вставьте прямую ссылку на картинку (URL):", "");
+                    if (!url) return;
+                    content = url;
+                } else {
+                    name = prompt("Имя файла:", type === 'secret' ? "Secret_Pass.txt" : "Новый документ.txt");
+                    content = '<h1>Новый файл</h1>';
+                }
+
                 if(!name) return;
                 
                 const newFile = {
                     id: 'f-' + Date.now(),
                     name: name,
-                    type: type,
-                    content: '<h1>New File</h1><p>Start typing here...</p>',
-                    isSecret: type === 'secret',
+                    type: fileType,
+                    content: content,
                     date: Date.now()
                 };
                 
@@ -394,107 +504,90 @@
             },
 
             saveDoc: function(id, btn) {
-                const content = document.getElementById('editor-' + id).innerHTML;
+                const editor = document.getElementById('editor-' + id);
+                if(!editor) return;
+                
                 const fileIndex = System.files.findIndex(f => f.id === id);
                 if(fileIndex > -1) {
-                    System.files[fileIndex].content = content;
+                    System.files[fileIndex].content = editor.innerHTML;
                     System.saveState();
                     
-                    // Button Feedback
                     const originalText = btn.innerText;
-                    btn.innerText = "✅ SAVED";
+                    btn.innerText = "✅ ОК";
                     setTimeout(() => btn.innerText = originalText, 1000);
                 }
             },
 
-            saveSettings: function(type) {
-                if(type === 'bg') {
-                    System.state.wallpaper = document.getElementById('set-bg').value;
-                    System.applyConfig();
-                } else if (type === 'pass') {
-                    System.state.password = document.getElementById('set-pass').value;
-                    alert("Password updated!");
-                } else if (type === 'reg') {
-                    System.state.region = document.getElementById('set-reg').value;
-                    System.applyConfig();
+            insertImage: function(id) {
+                const url = prompt("Введите URL картинки:");
+                if(url) {
+                    const imgTag = `<img src="${url}" style="max-width:100%;">`;
+                    document.getElementById('editor-' + id).innerHTML += `<br>${imgTag}<br>`;
                 }
+            },
+
+            saveSettings: function(key) {
+                if(key === 'bg') System.state.wallpaper = document.getElementById('set-bg').value;
+                if(key === 'pass') {
+                     System.state.password = document.getElementById('set-pass').value;
+                     alert('Пароль обновлен');
+                }
+                if(key === 'theme') System.state.theme = document.getElementById('set-theme').value;
+                
+                System.applyConfig();
                 System.saveState();
             },
 
-            toggleSecrets: function() {
-                const pass = prompt("Enter ADMIN Password to toggle protocol:");
-                if(pass === System.state.password) {
-                    System.state.showSecrets = !System.state.showSecrets;
-                    System.saveState();
-                    System.renderDesktop(); // Re-render to show/hide icons
-                    // Close settings window to refresh view
-                    document.querySelector('.window .settings-area').closest('.window').remove();
-                    System.openApp('settings', null);
-                } else {
-                    alert("ACCESS DENIED");
+            navBrowser: function(action) {
+                const input = document.getElementById('browser-url');
+                const content = document.getElementById('browser-content');
+                let val = input.value;
+
+                if(action === 'go') {
+                    if(val.includes('http') && (val.endsWith('.jpg') || val.endsWith('.png'))) {
+                        // Это картинка - показать внутри
+                        content.innerHTML = `<img src="${val}" style="max-width:100%; max-height:100%;">`;
+                    } else {
+                        // Это поиск
+                        window.open(`https://www.google.com/search?q=${val}`, '_blank');
+                        content.innerHTML = `<h3 style="color:var(--accent)">Запрос отправлен в новую вкладку</h3><p>Google блокирует открытие внутри фреймов.</p>`;
+                    }
                 }
             },
 
-            initTerminal: function() {
-                const input = document.getElementById('term-in');
-                const history = document.getElementById('term-history');
-                
-                input.focus();
-                input.addEventListener('keydown', (e) => {
-                    if(e.key === 'Enter') {
-                        const cmd = input.value.trim();
-                        const line = document.createElement('div');
-                        line.innerHTML = `root@hyper:~# ${cmd}`;
-                        history.appendChild(line);
+            searchYT: function() {
+                const query = document.getElementById('yt-search').value;
+                if(query) {
+                    window.open(`https://www.youtube.com/results?search_query=${query}`, '_blank');
+                }
+            },
 
-                        const resp = document.createElement('div');
-                        resp.style.color = "#ccc";
-                        resp.style.marginBottom = "5px";
-
-                        // COMMANDS
-                        if(cmd === 'help') {
-                            resp.innerHTML = "Commands: <br> - ls (list files)<br> - date<br> - whoami<br> - clear<br> - reboot (reset local data)";
-                        } else if (cmd === 'ls') {
-                            let fileList = System.files.map(f => `${f.isSecret ? '[LOCKED] ' : ''}${f.name}`).join('<br>');
-                            resp.innerHTML = fileList || "No files found.";
-                        } else if (cmd === 'date') {
-                            resp.innerText = new Date().toString();
-                        } else if (cmd === 'whoami') {
-                            resp.innerText = "root (Administrator)";
-                        } else if (cmd === 'reboot') {
-                            if(confirm("Factory Reset? All data will be lost.")) {
-                                localStorage.clear();
-                                location.reload();
-                            }
-                        } else if (cmd === 'clear') {
-                            history.innerHTML = '';
-                            resp.remove();
-                        } else {
-                            resp.innerText = `Command not found: ${cmd}`;
-                        }
-                        
-                        if(cmd !== 'clear') history.appendChild(resp);
-                        input.value = '';
-                        document.getElementById('term-out').scrollTop = document.getElementById('term-out').scrollHeight;
-                    }
-                });
+            toggleMenu: function() {
+               // Placeholder for start menu logic if needed later
+               const ctx = document.getElementById('context-menu');
+               ctx.style.display = 'block';
+               ctx.style.bottom = '50px';
+               ctx.style.left = '10px';
+               ctx.style.top = 'auto';
             }
         };
 
         /* --- GLOBAL EVENTS --- */
         document.addEventListener('contextmenu', (e) => {
+            if(e.target.closest('.window')) return; // Allow context menu in windows? No, keep it custom
             e.preventDefault();
             const ctx = document.getElementById('context-menu');
             ctx.style.display = 'block';
             ctx.style.left = e.pageX + 'px';
             ctx.style.top = e.pageY + 'px';
+            ctx.style.bottom = 'auto';
         });
 
         document.addEventListener('click', (e) => {
             document.getElementById('context-menu').style.display = 'none';
         });
 
-        // START SYSTEM
+        // INIT
         System.init();
 
     </script>
